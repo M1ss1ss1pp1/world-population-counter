@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>World Population Counter</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      margin-top: 30px;
+    }
+
+    #total {
+      font-size: 50px;
+      margin: 20px;
+    }
+
+    .continent {
+      background: white;
+      width: 300px;
+      margin: 15px auto;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .population {
+      font-size: 35px;
+      margin: 10px;
+    }
+
+    button {
+      font-size: 20px;
+      padding: 8px 18px;
+      margin: 5px;
+    }
+
+    #reset {
+      margin: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🌍 World Population Counter</h1>
+
+  <h2>Total Population</h2>
+
+  <div id="total">Loading...</div>
+  <p>Estimated live population — U.S. Census Bureau</p>
+
+
+  <div class="continent">
+    <h2>🌏 Asia</h2>
+    <div class="population" id="asia">0</div>
+
+    <button onclick="change('asia', 1)">+1</button>
+    <button onclick="change('asia', -1)">-1</button>
+  </div>
+
+ 
+  <div class="continent">
+    <h2>🌍 Africa</h2>
+    <div class="population" id="africa">0</div>
+
+    <button onclick="change('africa', 1)">+1</button>
+    <button onclick="change('africa', -1)">-1</button>
+  </div>
+
+
+  <div class="continent">
+    <h2>🌎 North America</h2>
+    <div class="population" id="northAmerica">0</div>
+
+    <button onclick="change('northAmerica', 1)">+1</button>
+    <button onclick="change('northAmerica', -1)">-1</button>
+  </div>
+
+
+  <div class="continent">
+    <h2>🌎 South America</h2>
+    <div class="population" id="southAmerica">0</div>
+
+    <button onclick="change('southAmerica', 1)">+1</button>
+    <button onclick="change('southAmerica', -1)">-1</button>
+  </div>
+
+
+  <div class="continent">
+    <h2>🌍 Europe</h2>
+    <div class="population" id="europe">0</div>
+
+    <button onclick="change('europe', 1)">+1</button>
+    <button onclick="change('europe', -1)">-1</button>
+  </div>
+
+
+  <div class="continent">
+    <h2>🌏 Oceania</h2>
+    <div class="population" id="oceania">0</div>
+
+    <button onclick="change('oceania', 1)">+1</button>
+    <button onclick="change('oceania', -1)">-1</button>
+  </div>
+
+
+  <div class="continent">
+    <h2>🧊 Antarctica</h2>
+    <div class="population" id="antarctica">0</div>
+
+    <button onclick="change('antarctica', 1)">+1</button>
+    <button onclick="change('antarctica', -1)">-1</button>
+  </div>
+
+
+  <button id="reset" onclick="resetAll()">Reset All</button>
+
+
+  <script>
+
+  // Today's world population snapshot
+  // U.S. Census Bureau — Oct 2, 2026
+
+  const worldSnapshot = {
+    population: 8210019685,
+    growthPerSecond: 2.169339485,
+    time: 1790957443 * 1000
+  };
+
+
+  // 2026 continent population estimates
+  // Used to calculate each continent's share
+
+  const continentReference = {
+
+    asia: 4863327395,
+    africa: 1584985258,
+    europe: 741646655,
+    northAmerica: 621279953,
+    southAmerica: 440484431,
+    oceania: 47118994
+
+  };
+
+
+  const referenceTotal =
+    continentReference.asia +
+    continentReference.africa +
+    continentReference.europe +
+    continentReference.northAmerica +
+    continentReference.southAmerica +
+    continentReference.oceania;
+
+
+  // Calculate population share of each continent
+
+  const share = {
+
+    asia:
+      continentReference.asia / referenceTotal,
+
+    africa:
+      continentReference.africa / referenceTotal,
+
+    europe:
+      continentReference.europe / referenceTotal,
+
+    northAmerica:
+      continentReference.northAmerica / referenceTotal,
+
+    southAmerica:
+      continentReference.southAmerica / referenceTotal,
+
+    oceania:
+      continentReference.oceania / referenceTotal
+
+  };
+
+
+  // Your manual +1 / -1 changes
+
+  let changes = {
+
+    asia: 0,
+    africa: 0,
+    europe: 0,
+    northAmerica: 0,
+    southAmerica: 0,
+    oceania: 0,
+    antarctica: 0
+
+  };
+
+
+  function getWorldPopulation() {
+
+    let secondsPassed =
+      (Date.now() - worldSnapshot.time) / 1000;
+
+
+    return Math.round(
+
+      worldSnapshot.population +
+
+      secondsPassed *
+      worldSnapshot.growthPerSecond
+
+    );
+
+  }
+
+
+  function getContinentPopulation() {
+
+    let world = getWorldPopulation();
+
+    let result = {};
+
+    result.asia =
+      Math.round(world * share.asia);
+
+    result.africa =
+      Math.round(world * share.africa);
+
+    result.europe =
+      Math.round(world * share.europe);
+
+    result.northAmerica =
+      Math.round(world * share.northAmerica);
+
+    result.southAmerica =
+      Math.round(world * share.southAmerica);
+
+
+    // Oceania gets the remainder,
+    // so all continents always equal world total
+
+    result.oceania =
+      world -
+      result.asia -
+      result.africa -
+      result.europe -
+      result.northAmerica -
+      result.southAmerica;
+
+
+    // No permanent population
+
+    result.antarctica = 0;
+
+
+    return result;
+
+  }
+
+
+  function render() {
+
+    let base =
+      getContinentPopulation();
+
+
+    let total = 0;
+
+
+    for (let continent in changes) {
+
+      let number =
+        base[continent] +
+        changes[continent];
+
+
+      document
+        .getElementById(continent)
+        .innerText =
+        number.toLocaleString();
+
+
+      total += number;
+
+    }
+
+
+    document
+      .getElementById("total")
+      .innerText =
+      total.toLocaleString();
+
+  }
+
+
+  function change(continent, amount) {
+
+    let base =
+      getContinentPopulation();
+
+
+    let currentPopulation =
+      base[continent] +
+      changes[continent];
+
+
+    // Prevent negative population
+
+    if (
+      currentPopulation + amount < 0
+    ) {
+
+      return;
+
+    }
+
+
+    changes[continent] += amount;
+
+
+    render();
+
+  }
+
+
+  function resetAll() {
+
+    for (let continent in changes) {
+
+      changes[continent] = 0;
+
+    }
+
+
+    render();
+
+  }
+
+
+  // Start app
+
+  render();
+
+
+  // Refresh every second
+
+  setInterval(render, 1000);
+
+</script>
+
+</body>
+</html>
